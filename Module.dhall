@@ -54,35 +54,35 @@ let make =
                 if enable then [ flag ] else [] : List Text
 
         let modifyFlags =
-              \(conf : ModifyOptions) ->
-                  optional "--transitive" conf.transitive
-                # optional "--check" conf.check
+            -- NOTE: trasitive / inplace must be the last argument
+              \(opts : ModifyOptions) ->
+                  optional "--check" opts.check
+                # ( if    opts.transitive
+                    then  [ "--transitive" ]
+                    else  [ "--inplace" ]
+                  )
 
         let freezeFlags =
-              \(conf : Freeze.Type) ->
-                  modifyFlags conf.{ transitive, check, file }
-                # optional "--all" conf.all
-                # optional "--cache" conf.cache
+              \(opts : Freeze.Type) ->
+                  optional "--all" opts.all
+                # optional "--cache" opts.cache
+                # modifyFlags opts.{ transitive, check, file }
 
         let format =
               \(opts : Format.Type) ->
-                cmd
-                  ([ "format" ] # modifyFlags opts # [ "--inplace" ])
-                  opts.file
+                cmd ([ "format" ] # modifyFlags opts) opts.file
 
         let lint =
               \(opts : Lint.Type) ->
-                cmd ([ "lint" ] # modifyFlags opts # [ "--inplace" ]) opts.file
+                cmd ([ "lint" ] # modifyFlags opts) opts.file
 
         let freeze =
               \(opts : Freeze.Type) ->
-                cmd
-                  ([ "freeze" ] # freezeFlags opts # [ "--inplace" ])
-                  opts.file
+                cmd ([ "freeze" ] # freezeFlags opts) opts.file
 
         let Render =
               { Type = { script : Text, file : Optional Text }
-              , default = { script = "dhall/render", file = None }
+              , default = { script = "dhall/render", file = None Text }
               }
 
         let renderFile =
@@ -100,18 +100,16 @@ let make =
                   ]
                 : Bash.Type
 
-        in  { Format
+        in  { evaluate
+            , Format
+            , format
             , Lint
+            , lint
             , Freeze
+            , freeze
             , Render
-            , Script =
-              { evaluate
-              , format
-              , lint
-              , freeze
-              , render
-                -- TODO bump
-              }
+            , render
+              -- TODO bump
             , Workflow =
                 let enforceLintScript =
                       \(file : Text) ->
