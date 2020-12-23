@@ -3,9 +3,9 @@
   You should NOT edit it manually, your changes will be lost.
 -->
 
-![CI](https://github.com/timbertson/dhall-ci-dhall/workflows/CI/badge.svg)
+[![CI](https://github.com/timbertson/dhall-ci-dhall/workflows/CI/badge.svg)](https://github.com/timbertson/dhall-ci-dhall/actions?query=workflow%3ACI+branch%3Amaster)
 
 # dhall-ci-dhall
 
-This repository provides dhall for [dhall-ci](https://github.com/timbertson/dhall-ci),
+This repository provides dhall support for [dhall-ci](https://github.com/timbertson/dhall-ci),
 you should go there for more details.

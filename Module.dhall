@@ -76,6 +76,9 @@ let make =
               \(opts : Lint.Type) ->
                 cmd ([ "lint" ] # modifyFlags opts) opts.file
 
+        let evaluateAndLint =
+              \(opts : Lint.Type) -> evaluate opts.file # lint opts
+
         let freeze =
               \(opts : Freeze.Type) ->
                 cmd ([ "freeze" ] # freezeFlags opts) opts.file
@@ -105,30 +108,28 @@ let make =
             , format
             , Lint
             , lint
+            , evaluateAndLint
             , Freeze
             , freeze
             , Render
             , render
               -- TODO bump
             , Workflow =
-                let enforceLintScript =
-                      \(file : Text) ->
-                        lint Lint::{ transitive = True, file } : Bash.Type
-
-                in  { enforceLint =
-                        \(file : Text) ->
-                          Step.bash (evaluate file # enforceLintScript file)
-                    , enforceRender =
-                        \(opts : Render.Type) ->
-                          Git.requireCleanWorkspaceAfterRunning
-                            (   lint
-                                  Lint::{
-                                  , transitive = True
-                                  , file = renderFile opts
-                                  }
-                              # render opts
-                            )
-                    }
+              { enforceLint =
+                  \(file : Text) ->
+                    Step.bash
+                      (   evaluate file
+                        # Git.requireCleanWorkspaceAfterRunning
+                            (lint Lint::{ transitive = True, file })
+                      )
+              , enforceRender =
+                  \(opts : Render.Type) ->
+                    Git.requireCleanWorkspaceAfterRunning
+                      (   lint
+                            Lint::{ transitive = True, file = renderFile opts }
+                        # render opts
+                      )
+              }
             }
 
 in  { Mode, make }
