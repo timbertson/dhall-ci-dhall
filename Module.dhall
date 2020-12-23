@@ -118,7 +118,29 @@ let make =
             , render
               -- TODO bump
             , Workflow =
-              { enforceLint =
+              { cache =
+                  \(globs : List Text) ->
+                    let globStrings =
+                          Prelude.List.map
+                            Text
+                            Text
+                            (\(g : Text) -> "'${g}'")
+                            globs
+
+                    let globArguments = Prelude.Text.concatSep ", " globStrings
+
+                    in  Workflow.Step::{
+                        , name = Some "Dhall cache"
+                        , uses = Some "actions/cache@v1"
+                        , `with` = Some
+                            ( toMap
+                                { path = "~/.cache/dhall"
+                                , key =
+                                    "dhall-cache-\${{ hashFiles(${globArguments}) }}"
+                                }
+                            )
+                        }
+              , enforceLint =
                   \(file : Text) ->
                     Step.bash
                       (   evaluate file
