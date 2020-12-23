@@ -46,7 +46,10 @@ let make =
                   [ "${dhall} ${Prelude.Text.concatSep " " args} \"${file}\"" ]
                 : Bash.Type
 
-        let evaluate = cmd [ "--output", "/dev/null", "--file" ]
+        let evaluate =
+              \(file : Text) ->
+                  [ "${dhall} --plain --file \"${file}\" > /dev/null" ]
+                : Bash.Type
 
         let optional =
               \(flag : Text) ->
