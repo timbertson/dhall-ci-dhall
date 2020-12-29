@@ -19,8 +19,7 @@ let Project =
       , lint : Base.Lint.Type
       , render : Optional Render.Type
       , freeze : Optional Base.Freeze.Type
-      , bump : Optional Bump.Type
-      , bumpFiles : List Text
+      , bump : Optional Bump.Semantic.Type
       }
 
 let default =
@@ -29,8 +28,7 @@ let default =
       , lint = Base.Lint.default
       , render = Some Render.default
       , freeze = Some Base.Freeze.default
-      , bump = Some Bump.default
-      , bumpFiles = [] : List Text
+      , bump = None
       }
 
 let Makefile =
@@ -104,12 +102,12 @@ let makefileTargets =
                       ]
                   )
               # optional
-                  Bump.Type
+                  Bump.Semantic.Type
                   project.bump
-                  ( \(bump : Bump.Type) ->
+                  ( \(bump : Bump.Semantic.Type) ->
                       [ Make.Target.Phony::{
                         , name = "bump"
-                        , script = Bump.bump bump project.bumpFiles
+                        , script = Bump.semantic bump
                         }
                       ]
                   )

@@ -46,7 +46,7 @@ let make =
                 , Freeze = Base.Freeze
                 , freeze
                 , Render = Render.{ Type, default }
-                , Bump = Bump.{ Type, default }
+                , Bump = Bump.{ Type, default, Semantic, semantic }
                 , Workflow =
                   { cache =
                       \(globs : List Text) ->
