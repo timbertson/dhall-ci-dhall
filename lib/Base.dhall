@@ -12,21 +12,24 @@ let ModifyOptions =
 
 let modifyDefault = { transitive = True, check = False }
 
-let dhall =
-      \(mode : Mode) ->
-        merge { Unicode = "dhall --unicode", ASCII = "dhall --ascii" } mode
+let charsetFlag =
+      \(mode : Mode) -> merge { Unicode = "--unicode", ASCII = "--ascii" } mode
 
 let cmd =
       \(mode : Mode) ->
       \(args : List Text) ->
       \(file : Text) ->
-          [ "${dhall mode} ${Prelude.Text.concatSep " " args} \"${file}\"" ]
+          [ "dhall ${charsetFlag mode} ${Prelude.Text.concatSep
+                                           " "
+                                           args} \"${file}\""
+          ]
         : Bash.Type
 
 let evaluate =
       \(mode : Mode) ->
       \(file : Text) ->
-        [ "${dhall mode} --plain --file \"${file}\" > /dev/null" ] : Bash.Type
+          [ "dhall ${charsetFlag mode} --plain --file \"${file}\" > /dev/null" ]
+        : Bash.Type
 
 let optional =
       \(flag : Text) ->
@@ -100,18 +103,18 @@ let docs =
       \(mode : Mode) ->
       \(opts : Docs.Type) ->
         let args =
-                [ "docs"
-                , "--input"
+                [ "--input"
                 , Bash.doubleQuote opts.input
                 , "--output-link"
                 , Bash.doubleQuote opts.outputLink
                 ]
               # optionalArg "--package-name" opts.packageName
 
-        in  [ "${dhall mode} ${Prelude.Text.concatSep " " args}" ] : Bash.Type
+        let argstr = Prelude.Text.concatSep " " args
+
+        in  [ "dhall-docs ${charsetFlag mode} ${argstr}" ] : Bash.Type
 
 in  { Mode
-    , dhall
     , cmd
     , evaluate
     , evaluateAndLint
