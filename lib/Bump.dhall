@@ -83,12 +83,13 @@ let semantic =
         let addHashTo =
               \(dest : Text) ->
               \(file : Text) ->
-                "${dest}+=\"\$(dhall hash ${Bash.doubleQuote file})\""
+                "${dest}+=\"\$(dhall hash --file ${Bash.doubleQuote file})\""
 
         let applyBump =
               \(spec : Text) ->
                 Bash.join
-                  [ [ "echo \"Applying bump: ${spec}\""
+                  [ [ "echo"
+                    , "echo \"Applying bump: ${spec}\""
                     , "originalHashes=''"
                     , "finalHashes=''"
                     ]
@@ -103,16 +104,16 @@ let semantic =
                       (   eachFile
                             opts.files
                             ( \(file : Text) ->
-                                "rm ${Bash.doubleQuote file}.orig"
+                                "mv ${Bash.doubleQuote file}{.orig,}"
                             )
-                        # [ "echo 'Bump applied: ${spec}'" ]
+                        # [ "echo \"  [Reverting bump: ${spec}\"]" ]
                       )
                       (   eachFile
                             opts.files
                             ( \(file : Text) ->
-                                "mv ${Bash.doubleQuote file}{.orig,}"
+                                "rm ${Bash.doubleQuote file}.orig"
                             )
-                        # [ "echo 'Bump had no effect: ${spec}'" ]
+                        # [ "echo \"Applied: ${spec}\"" ]
                       )
                   ]
 
@@ -136,7 +137,8 @@ let semantic =
                         opts.bump.specs
 
         in  Bash.join
-              [ Bash.`if`
+              [ [ "set +x" ]
+              , Bash.`if`
                   "! git --no-pager diff --patch --exit-code --"
                   [ "echo >&2 'You have working changes, add or commit them first'"
                   , "exit 1"
