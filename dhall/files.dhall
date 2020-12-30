@@ -1,6 +1,6 @@
 let Meta =
         env:DHALL_CI_META_OVERRIDE
-      ? https://raw.githubusercontent.com/timbertson/dhall-ci/e6cb50732b6f448513d252416abcfb3cc8f0a804/Meta/package.dhall sha256:c9f060248aa9ebac979cf3b50143c34b6cc5c7ff33804d80eff5d15e85c5b073
+      ? https://raw.githubusercontent.com/timbertson/dhall-ci/e9f97f85078f4ec71ad7e00416f7a03ee14c40aa/Meta/package.dhall sha256:d456e4fad9f23f262dcc50fe0821ab83be6c8d40bbdc2784eec0812a3fa75fa9
 
 in  { files =
         Meta.files

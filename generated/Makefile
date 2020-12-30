@@ -54,29 +54,31 @@ render:
 .SILENT: bump
 .PHONY: bump
 bump:
+	set +x
 	if ! git --no-pager diff --patch --exit-code --; then
 	  echo >&2 'You have working changes, add or commit them first'
 	  exit 1
 	fi
 	function bump {
-	  echo "Applying bump: $1"
+	  echo
+	  echo "Applying bump: $$1"
 	  originalHashes=''
 	  finalHashes=''
-	  originalHashes+="$(dhall hash "package.dhall")"
-	  originalHashes+="$(dhall hash "dhall/files.dhall")"
+	  originalHashes+="$$(dhall hash --file "package.dhall")"
+	  originalHashes+="$$(dhall hash --file "dhall/files.dhall")"
 	  cp "dependencies/CI.dhall"{,.orig}
 	  cp "dhall/files.dhall"{,.orig}
-	  dhall/bump --to "$1" --freeze-cmd="dhall --ascii freeze --inplace" --allow-unused dependencies/CI.dhall dhall/files.dhall
-	  finalHashes+="$(dhall hash "package.dhall")"
-	  finalHashes+="$(dhall hash "dhall/files.dhall")"
-	  if [ "$originalHashes" = "$finalHashes" ]; then
-	    rm "dependencies/CI.dhall".orig
-	    rm "dhall/files.dhall".orig
-	    echo 'Bump applied: $1'
-	  else
+	  dhall/bump --to "$$1" --freeze-cmd="dhall --ascii freeze --inplace" --allow-unused dependencies/CI.dhall dhall/files.dhall
+	  finalHashes+="$$(dhall hash --file "package.dhall")"
+	  finalHashes+="$$(dhall hash --file "dhall/files.dhall")"
+	  if [ "$$originalHashes" = "$$finalHashes" ]; then
 	    mv "dependencies/CI.dhall"{.orig,}
 	    mv "dhall/files.dhall"{.orig,}
-	    echo 'Bump had no effect: $1'
+	    echo "  [Reverting bump: $$1"]
+	  else
+	    rm "dependencies/CI.dhall".orig
+	    rm "dhall/files.dhall".orig
+	    echo "Applied: $$1"
 	  fi
 	}
 	bump "timbertson/dhall-ci:"
