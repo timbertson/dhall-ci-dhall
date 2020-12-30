@@ -20,6 +20,7 @@ let Project =
       , render : Optional Render.Type
       , freeze : Optional Base.Freeze.Type
       , bump : Optional Bump.Semantic.Type
+      , docs : Optional Base.Docs.Type
       }
 
 let default =
@@ -28,8 +29,14 @@ let default =
       , lint = Base.Lint.default
       , render = Some Render.default
       , freeze = Some Base.Freeze.default
-      , bump = None
+      , bump = None Bump.Semantic.Type
+      , docs = None Base.Docs.Type
       }
+
+let _testDefault =
+        assert
+      :     (default // { packages = [ "package.dhall" ] } : Project).packages
+        ===  [ "package.dhall" ]
 
 let Makefile =
     -- reserved for future extensibility
@@ -108,6 +115,16 @@ let makefileTargets =
                       [ Make.Target.Phony::{
                         , name = "bump"
                         , script = Bump.semantic bump
+                        }
+                      ]
+                  )
+              # optional
+                  Base.Docs.Type
+                  project.docs
+                  ( \(docs : Base.Docs.Type) ->
+                      [ Make.Target.Phony::{
+                        , name = "docs"
+                        , script = Base.docs project.mode docs
                         }
                       ]
                   )

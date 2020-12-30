@@ -22,71 +22,65 @@ let Bump = ./Bump.dhall
 
 let make =
       \(mode : Base.Mode) ->
-        let evaluate = Base.evaluate mode
+            Render.{ render }
+        /\  Bump.{ bump }
+        /\  { evaluate = Base.evaluate mode
+            , evaluateAndFormat = Base.evaluateAndFormat mode
+            , evaluateAndLint = Base.evaluateAndLint mode
+            , Format = Base.Format
+            , format = Base.format mode
+            , Lint = Base.Lint
+            , lint = Base.lint mode
+            , Freeze = Base.Freeze
+            , freeze = Base.freeze mode
+            , Docs = Base.Docs
+            , docs = Base.docs mode
+            , Render = Render.{ Type, default }
+            , Bump = Bump.{ Type, default, Semantic, semantic }
+            , Workflow =
+              { cache =
+                  \(globs : List Text) ->
+                    let globStrings =
+                          Prelude.List.map
+                            Text
+                            Text
+                            (\(g : Text) -> "'${g}'")
+                            globs
 
-        let format = Base.format mode
+                    let globArguments = Prelude.Text.concatSep ", " globStrings
 
-        let lint = Base.lint mode
-
-        let evaluateAndLint = Base.evaluateAndLint mode
-
-        let evaluateAndFormat = Base.evaluateAndFormat mode
-
-        let freeze = Base.freeze mode
-
-        in      Render.{ render }
-            /\  Bump.{ bump }
-            /\  { evaluate
-                , evaluateAndFormat
-                , evaluateAndLint
-                , Format = Base.Format
-                , format
-                , Lint = Base.Lint
-                , lint
-                , Freeze = Base.Freeze
-                , freeze
-                , Render = Render.{ Type, default }
-                , Bump = Bump.{ Type, default, Semantic, semantic }
-                , Workflow =
-                  { cache =
-                      \(globs : List Text) ->
-                        let globStrings =
-                              Prelude.List.map
-                                Text
-                                Text
-                                (\(g : Text) -> "'${g}'")
-                                globs
-
-                        let globArguments =
-                              Prelude.Text.concatSep ", " globStrings
-
-                        in  Workflow.Step::{
-                            , name = Some "Dhall cache"
-                            , uses = Some "actions/cache@v1"
-                            , `with` = Some
-                                ( toMap
-                                    { path = "~/.cache/dhall"
-                                    , key =
-                                        "dhall-cache-\${{ hashFiles(${globArguments}) }}"
-                                    }
-                                )
-                            }
-                  , enforceLint =
-                      \(file : Text) ->
-                        Step.bash
-                          (   evaluate file
-                            # Git.requireCleanWorkspaceAfterRunning
-                                (lint Base.Lint::{ transitive = True } file)
-                          )
-                  , enforceRender =
-                      \(opts : Render.Type) ->
-                        Git.requireCleanWorkspaceAfterRunning
-                          (   Render.render opts
-                            # lint
+                    in  Workflow.Step::{
+                        , name = Some "Dhall cache"
+                        , uses = Some "actions/cache@v1"
+                        , `with` = Some
+                            ( toMap
+                                { path = "~/.cache/dhall"
+                                , key =
+                                    "dhall-cache-\${{ hashFiles(${globArguments}) }}"
+                                }
+                            )
+                        }
+              , enforceLint =
+                  \(file : Text) ->
+                    Step.bash
+                      (   Base.evaluate mode file
+                        # Git.requireCleanWorkspaceAfterRunning
+                            ( Base.lint
+                                mode
                                 Base.Lint::{ transitive = True }
-                                (Render.renderFile opts)
-                          )
-                  }
-                }
+                                file
+                            )
+                      )
+              , enforceRender =
+                  \(opts : Render.Type) ->
+                    Git.requireCleanWorkspaceAfterRunning
+                      (   Render.render opts
+                        # Base.lint
+                            mode
+                            Base.Lint::{ transitive = True }
+                            (Render.renderFile opts)
+                      )
+              }
+            }
 
 in  { Mode = Base.Mode, make }
