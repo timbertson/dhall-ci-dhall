@@ -36,7 +36,7 @@ let make =
             , Docs = Base.Docs
             , docs = Base.docs mode
             , Render = Render.{ Type, default }
-            , Bump = Bump.{ Type, default, Semantic, semantic }
+            , Bump = Bump.{ Type, default }
             , Workflow =
               { cache =
                   \(globs : List Text) ->

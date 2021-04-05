@@ -10,7 +10,12 @@ let Base = ./Base.dhall
 
 let Render = ./Render.dhall
 
-let Bump = ./Bump.dhall
+let RawBump = ./Bump.dhall
+
+let Bump =
+      { Type = { options : RawBump.Type, files : List Text }
+      , default = { options = RawBump.default, files = [] : List Text }
+      }
 
 let Project =
       { mode : Base.Mode
@@ -19,7 +24,7 @@ let Project =
       , lint : Base.Lint.Type
       , render : Optional Render.Type
       , freeze : Optional Base.Freeze.Type
-      , bump : Optional Bump.Semantic.Type
+      , bump : Optional Bump.Type
       , docs : Optional Base.Docs.Type
       }
 
@@ -29,7 +34,7 @@ let default =
       , lint = Base.Lint.default
       , render = Some Render.default
       , freeze = Some Base.Freeze.default
-      , bump = None Bump.Semantic.Type
+      , bump = None Bump.Type
       , docs = None Base.Docs.Type
       }
 
@@ -109,12 +114,12 @@ let makefileTargets =
                       ]
                   )
               # optional
-                  Bump.Semantic.Type
+                  Bump.Type
                   project.bump
-                  ( \(bump : Bump.Semantic.Type) ->
+                  ( \(bump : Bump.Type) ->
                       [ Make.Target.Phony::{
                         , name = "bump"
-                        , script = Bump.semantic bump
+                        , script = RawBump.bump bump.options bump.files
                         }
                       ]
                   )
@@ -135,4 +140,4 @@ let makefile =
       \(make : Makefile.Type) ->
         Make.render Make::{ targets = makefileTargets project make } : Text
 
-in  { Type = Project, default, Makefile, makefileTargets, makefile }
+in  { Type = Project, default, Makefile, makefileTargets, makefile, Bump }
