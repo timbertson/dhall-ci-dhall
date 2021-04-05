@@ -10,6 +10,12 @@ SHELL = bash
 ci: render lint
 	
 
+.SILENT: digest
+.PHONY: digest
+digest:
+	dhall --ascii --plain --file package.dhall
+	dhall --ascii --plain --file dhall/files.dhall
+
 .SILENT: eval
 .PHONY: eval
 eval:
@@ -86,3 +92,8 @@ bump:
 	bump "timbertson/dhall-ci-dhall:"
 	bump "timbertson/dhall-ci-docker:"
 	bump "timbertson/dhall-render:"
+
+.SILENT: docs
+.PHONY: docs
+docs:
+	dhall-docs --ascii --input "." --output-link "docs"
