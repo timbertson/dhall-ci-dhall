@@ -21,7 +21,7 @@ jobs:
     - name: Self-update
       uses: timbertson/self-update-action@v1
       with:
-        GITHUB_TOKEN: "${{secrets.GITHUB_TOKEN}}"
+        GITHUB_TOKEN: "${{secrets.GHTOKEN_PAT}}"
         updateScript: |
           #!/usr/bin/env bash
           set -eu -o pipefail
@@ -36,3 +36,4 @@ name: Self-update
     - wip
   schedule:
   - cron: 0 0 * * 1,4
+  workflow_dispatch: {}
