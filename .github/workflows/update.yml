@@ -18,22 +18,29 @@ jobs:
         docker login -u "$GITHUB_ACTOR" --password-stdin docker.pkg.github.com <<EOF
         $DOCKER_PASSWORD
         EOF
-    - name: Self-update
+    - name: self-update
       uses: timbertson/self-update-action@v1
       with:
         GITHUB_TOKEN: "${{secrets.GHTOKEN_PAT}}"
+        setupScript: |
+          #!/usr/bin/env bash
+          set -eu -o pipefail
+          docker run --rm -i "--volume" "$PWD:/cwd" "--workdir=/cwd" "docker.pkg.github.com/timbertson/dhall-ci/dhall:1.40" bash -eu -o pipefail <<EOF_runInDocker
+            make bump
+
+          EOF_runInDocker
         updateScript: |
           #!/usr/bin/env bash
           set -eu -o pipefail
-          docker run --rm -i "--volume" "$PWD:/cwd" "--workdir=/cwd" "docker.pkg.github.com/timbertson/dhall-ci/dhall:1.37" bash -eu -o pipefail <<EOF_runInDocker
-            make bump ci
+          docker run --rm -i "--volume" "$PWD:/cwd" "--workdir=/cwd" "docker.pkg.github.com/timbertson/dhall-ci/dhall:1.40" bash -eu -o pipefail <<EOF_runInDocker
+            make ci
 
           EOF_runInDocker
-name: Self-update
+name: Update
 'on':
   push:
     branches:
-    - wip
+    - self-upate-test
   schedule:
   - cron: 0 0 * * 1,4
   workflow_dispatch: {}

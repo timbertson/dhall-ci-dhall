@@ -2,15 +2,15 @@ let Prelude = ../dependencies/Prelude.dhall
 
 let CI = ../dependencies/CI.dhall
 
-let Make = CI.Make
-
-let Bash = CI.Bash
-
 let Base = ./Base.dhall
 
 let Render = ./Render.dhall
 
 let RawBump = ./Bump.dhall
+
+let Make = CI.Make
+
+let Bash = CI.Bash
 
 let Bump =
       { Type = { options : RawBump.Type, files : List Text }

@@ -1,2 +1,0 @@
-    ../../dhall-ci/package.dhall
-/\  { Git = ../../dhall-ci-git/package.dhall }

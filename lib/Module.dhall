@@ -8,17 +8,17 @@ let Prelude = ../dependencies/Prelude.dhall
 
 let CI = ../dependencies/CI.dhall
 
-let Workflow = CI.Workflow
-
-let Git = CI.Git
-
-let Step = Workflow.Step
-
 let Base = ./Base.dhall
 
 let Render = ./Render.dhall
 
 let Bump = ./Bump.dhall
+
+let Workflow = CI.Workflow
+
+let Git = CI.Git
+
+let Step = Workflow.Step
 
 let make =
       \(mode : Base.Mode) ->
